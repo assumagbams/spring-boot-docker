@@ -44,15 +44,30 @@ spec:
   type: LoadBalancer
 ---
 apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: backend-claim
+spec:
+  capacity:
+   storage: 1Gi
+  accessModes:
+   - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data"
+  storageClassName: slow
+---
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: mongodbpvc 
+  name: backend-claim
 spec:
   accessModes:
     - ReadWriteOnce
+  volumeMode: Filesystem
   resources:
     requests:
-      storage: 16Gi
+      storage: 1Gi
+  storageClassName: slow
 ---
 apiVersion: apps/v1
 kind: ReplicaSet
@@ -71,7 +86,7 @@ spec:
        volumes:
        - name: pvc
          persistentVolumeClaim:
-           claimName: mongodbpvc     
+           claimName: backend-claim    
        containers:
        - name: mongodbcontainer
          image: mongo
